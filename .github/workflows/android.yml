@@ -1,0 +1,42 @@
+
+name: Build Android Phone and Wear OS APKs
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Build APKs
+        run: gradle :phone:assembleDebug :wear:assembleDebug --no-daemon
+
+      - name: Upload phone APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BTC-MarketClock-Phone-Debug
+          path: phone/build/outputs/apk/debug/*.apk
+
+      - name: Upload Wear OS APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BTC-MarketClock-Wear-Debug
+          path: wear/build/outputs/apk/debug/*.apk
